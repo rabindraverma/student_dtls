@@ -9,6 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.student.exception.StudentNotFoundException;
+
 @RestControllerAdvice
 public class ExceptionHandlerAdvice {
 
@@ -23,13 +25,21 @@ public class ExceptionHandlerAdvice {
 		return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
 
 	}
-	
+	@ExceptionHandler(StudentNotFoundException.class)
+	public ResponseEntity<Map<String, String>> handleStudentNotFoundException(
+			StudentNotFoundException ex) {
+		Map<String, String> errorMap = new HashMap<>();
+		
+			errorMap.put("errorMsg", ex.getMessage());
+		
+		return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
+
+	}
 	@ExceptionHandler(RuntimeException.class)
 	public ResponseEntity<Map<String, String>> handleRuntimeException(
 			RuntimeException ex) {
 		Map<String, String> errorMap = new HashMap<>();
 		errorMap.put("errorMsg", ex.getMessage());
 		return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
-
 	}
 }

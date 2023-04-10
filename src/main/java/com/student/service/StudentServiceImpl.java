@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.student.entity.Student;
+import com.student.exception.StudentNotFoundException;
 import com.student.repository.StudentRepository;
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -73,29 +74,31 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
-	public Student updateStudentMarks(Student student) {
+	public Student updateStudentMarks(Student student) throws StudentNotFoundException {
 		Optional<Student> optionalStudent = studentRepository.findById(student.getId());
+		if (optionalStudent.isPresent()) {
+			// Calculate total, average, and result
+			int totalMarks = student.getMarks1() + student.getMarks2() + student.getMarks3();
+			double averageMarks = totalMarks / 3.0;
+			boolean result = student.getMarks1() >= 35 && student.getMarks2() >= 35 && student.getMarks3() >= 35;
 
-		// Calculate total, average, and result
-		int totalMarks = student.getMarks1() + student.getMarks2() + student.getMarks3();
-		double averageMarks = totalMarks / 3.0;
-		boolean result = student.getMarks1() >= 35 && student.getMarks2() >= 35 && student.getMarks3() >= 35;
+			// Update student object
+			Student updatedStudent = optionalStudent.get();
+			updatedStudent.setMarks1(student.getMarks1());
+			updatedStudent.setMarks2(student.getMarks2());
+			updatedStudent.setMarks3(student.getMarks3());
+			updatedStudent.setTotal(totalMarks);
+			updatedStudent.setAverage(averageMarks);
+			if (result) {
+				updatedStudent.setResult("PASS");
+			} else {
+				updatedStudent.setResult("FAIL");
+			}
 
-		// Update student object
-		Student updatedStudent = optionalStudent.get();
-		updatedStudent.setMarks1(student.getMarks1());
-		updatedStudent.setMarks2(student.getMarks2());
-		updatedStudent.setMarks3(student.getMarks3());
-		updatedStudent.setTotal(totalMarks);
-		updatedStudent.setAverage(averageMarks);
-		if (result) {
-			updatedStudent.setResult("PASS");
-		} else {
-			updatedStudent.setResult("FAIL");
+			// Save to database
+			return studentRepository.save(updatedStudent);
 		}
-
-		// Save to database
-		return studentRepository.save(updatedStudent);
+		throw new StudentNotFoundException("student not found with id : "+student.getId());
 	}
 
 }

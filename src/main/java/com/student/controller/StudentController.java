@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.student.entity.Student;
+import com.student.exception.StudentNotFoundException;
 import com.student.service.StudentService;
 
 import jakarta.validation.Valid;
@@ -28,7 +29,7 @@ public class StudentController {
 	}
 
 	@PutMapping("/students/{id}")
-	public ResponseEntity<Student> updateStudentMarks(@PathVariable Long id, @RequestBody Student student) {
+	public ResponseEntity<Student> updateStudentMarks(@PathVariable Long id, @RequestBody Student student) throws StudentNotFoundException {
 		student.setId(id);
 		Student response = studentService.updateStudentMarks(student);
 		return ResponseEntity.ok(response);
